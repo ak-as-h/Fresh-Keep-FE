@@ -1,11 +1,26 @@
 /**
- * SearchBar — Visual search input with liquid glass effect and icon.
+ * SearchBar — Glass-styled search input.
+ * Accepts controlled value/onChange props so parent pages can wire it to state.
+ * Falls back to internal state when used standalone (uncontrolled mode).
  */
 import { Search, X } from 'lucide-react';
 import { useState } from 'react';
 
-export default function SearchBar({ placeholder = 'Search items...' }) {
-  const [value, setValue] = useState('');
+export default function SearchBar({
+  placeholder = 'Search items...',
+  value: controlledValue,
+  onChange: controlledOnChange,
+}) {
+  // Uncontrolled fallback (used when no value/onChange are passed)
+  const [internalValue, setInternalValue] = useState('');
+  const isControlled = controlledValue !== undefined;
+  const value = isControlled ? controlledValue : internalValue;
+  const handleChange = isControlled
+    ? (e) => controlledOnChange(e.target.value)
+    : (e) => setInternalValue(e.target.value);
+  const handleClear = isControlled
+    ? () => controlledOnChange('')
+    : () => setInternalValue('');
 
   return (
     <div className="relative group">
@@ -13,7 +28,7 @@ export default function SearchBar({ placeholder = 'Search items...' }) {
       <input
         type="text"
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={handleChange}
         placeholder={placeholder}
         className="
           w-full pl-10 pr-10 py-2.5 rounded-xl text-sm
@@ -44,7 +59,7 @@ export default function SearchBar({ placeholder = 'Search items...' }) {
       />
       {value && (
         <button
-          onClick={() => setValue('')}
+          onClick={handleClear}
           className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-md hover:bg-bark-100 transition-colors"
           aria-label="Clear search"
         >

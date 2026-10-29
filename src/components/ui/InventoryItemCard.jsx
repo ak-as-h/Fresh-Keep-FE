@@ -1,12 +1,13 @@
 /**
  * InventoryItemCard — Card showing a food item in the inventory grid.
- * This is a design-only component; buttons do not perform actions.
+ * Buttons now perform real actions: navigate to edit, open delete confirmation.
  * Enhanced with liquid glass depth effects.
  */
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Pencil, Trash2, CheckCircle2 } from 'lucide-react';
 import GlassCard from './GlassCard';
 import StatusBadge from './StatusBadge';
+import { computeStatus, formatDateShort } from '../../utils/itemUtils';
 
 const categoryIcons = {
   'Fruits': '🍎',
@@ -23,7 +24,8 @@ const categoryIcons = {
   'Other': '📦',
 };
 
-export default function InventoryItemCard({ item }) {
+export default function InventoryItemCard({ item, onDelete }) {
+  const navigate = useNavigate();
   const {
     id,
     name,
@@ -32,9 +34,10 @@ export default function InventoryItemCard({ item }) {
     unit,
     location,
     expiryDate,
-    status,
   } = item;
 
+  const status = computeStatus(expiryDate);
+  const displayDate = formatDateShort(expiryDate);
   const emoji = categoryIcons[category] || '📦';
 
   const locationColors = {
@@ -112,23 +115,16 @@ export default function InventoryItemCard({ item }) {
           {location}
         </span>
         <span className="w-px h-3 bg-bark-200/50" />
-        <span>{expiryDate}</span>
+        <span>{displayDate}</span>
       </div>
 
-      {/* Action buttons — visual only */}
+      {/* Action buttons — now functional */}
       <div className="flex items-center gap-1.5 pt-1 border-t border-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <button
           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs text-sage-600 hover:bg-sage-50/60 transition-colors"
-          aria-label={`Mark ${name} as used`}
-          title="Mark as used"
-        >
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Use</span>
-        </button>
-        <button
-          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs text-bark-500 hover:bg-cream-100/60 transition-colors"
           aria-label={`Edit ${name}`}
           title="Edit"
+          onClick={() => navigate(`/add?edit=${id}`)}
         >
           <Pencil className="w-3.5 h-3.5" />
           <span>Edit</span>
@@ -137,6 +133,7 @@ export default function InventoryItemCard({ item }) {
           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs text-coral-500 hover:bg-coral-50/60 transition-colors ml-auto"
           aria-label={`Delete ${name}`}
           title="Delete"
+          onClick={() => onDelete && onDelete(id, name)}
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
