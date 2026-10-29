@@ -1,5 +1,5 @@
 import axiosConfig from "./AxiosConfig";
-import { BASEURL } from "./BaseURL";
+import { BASEURL } from "./BASEURL";
 
 export const addFoodItem = async (reqBody) => {
   return await axiosConfig("post", `${BASEURL}/foodDatas`, reqBody);
